@@ -13,6 +13,7 @@ import time
 RX_FORMAT = ["lat", "lon", "rx_time", "rx_node_id", "tx_time", "tx_node_id", "rssi", "snr"]
 TX_FORMAT = ["lat", "lon", "tx_time", "tx_node_id"]
 
+TIMEOUT = 10.0 # secs
 
 # Get the serial line as a command line parameter
 parser = argparse.ArgumentParser(description='Read data from pycom')
@@ -29,7 +30,7 @@ rxStarted = False
 txStarted = False
 nodeId = None
 
-with serial.Serial(args.port, 115200) as ser:
+with serial.Serial(args.port, 115200, timeout=TIMEOUT) as ser:
     while(True):
         line = ser.readline().decode("utf-8")[:-2]
         if line[:4] == "#tx#" and line.endswith("##"):
