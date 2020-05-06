@@ -28,7 +28,8 @@ txLines = []
 # Check for complete datasets
 rxStarted = False
 txStarted = False
-nodeId = None
+nodeIdRx = None
+nodeIdTx = None
 
 with serial.Serial(args.port, 115200, timeout=TIMEOUT) as ser:
     while(True):
@@ -37,7 +38,7 @@ with serial.Serial(args.port, 115200, timeout=TIMEOUT) as ser:
             # Handle tx data
             procline = line[4:-2]
             if procline.endswith("START"):
-                nodeId = procline.split("-")[0]
+                nodeIdRx = procline.split("-")[0]
                 txStarted = True
             elif procline.endswith("END"):
                 txStarted = False
@@ -48,7 +49,7 @@ with serial.Serial(args.port, 115200, timeout=TIMEOUT) as ser:
             # Handle rx data
             procline = line[4:-2]
             if procline.endswith("START"):
-                nodeId = procline.split("-")[0]
+                nodeIdTx = procline.split("-")[0]
                 rxStarted = True
             elif procline.endswith("END"):
                 rxStarted = False
@@ -62,20 +63,27 @@ with serial.Serial(args.port, 115200, timeout=TIMEOUT) as ser:
 
 print("Got", len(rxLines), "rx datasets")
 print("Got", len(txLines), "tx datasets")
-print("Node id:", nodeId)
+print("Node id rx:", nodeIdRx)
+print("Node id tx:", nodeIdTx)
 
 # Generic filename
 timestamp = str(int(time.time()))
 
-with open(timestamp+"_rx_"+nodeId+".csv", "w") as file_rx:
-    file_rx.write(";".join(RX_FORMAT)+"\n")
-    for data in rxLines:
-        file_rx.write(data+"\n")
+if nodeIdRx:
+    with open(timestamp+"_rx_"+nodeIdRx+".csv", "w") as file_rx:
+        file_rx.write(";".join(RX_FORMAT)+"\n")
+        for data in rxLines:
+            file_rx.write(data+"\n")
+else:
+    print("No RX data received")
 
-with open(timestamp+"_tx_"+nodeId+".csv", "w") as file_tx:
-    file_tx.write(";".join(TX_FORMAT)+"\n")
-    for data in txLines:
-        file_tx.write(data+"\n")
+if nodeIdTx:
+    with open(timestamp+"_tx_"+nodeIdTx+".csv", "w") as file_tx:
+        file_tx.write(";".join(TX_FORMAT)+"\n")
+        for data in txLines:
+            file_tx.write(data+"\n")
+else:
+    print("No TX data received")
 
 print("Done")
 
